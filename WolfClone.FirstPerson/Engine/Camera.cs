@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-using Vector2D = Microsoft.Xna.Framework.Vector2;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace WolfClone.FirstPerson.Engine;
 
@@ -10,12 +10,12 @@ internal class Camera(int width, int height, World world)
     public int Width { get; private set; } = width; // Camera view width in pixels
     public int Height { get; private set; } = height; // Camera view height in pixels
 
-    public Vector2D Position => _world.Player.Position;
-    public Vector2D Direction => _world.Player.Direction;
+    public Vector2 Position => _world.Player.Position;
+    public Vector2 Direction => _world.Player.Direction;
 
     private readonly World _world = world;
 
-    private Vector2D _plane;
+    private Vector2 _plane;
 
     public Color[] CaptureFrame()
     {
@@ -41,15 +41,15 @@ internal class Camera(int width, int height, World world)
         for (int x = 0; x < Width; x++)
         {
             float horz = 2.0f * x / Width - 1;
-            Vector2D rayDirection = Direction + _plane * horz;
-            Vector2D tilePosition = Vector2D.Floor(Position);
-            Vector2D delta = new
+            Vector2 rayDirection = Direction + _plane * horz;
+            Vector2 tilePosition = Vector2.Floor(Position);
+            Vector2 delta = new
             (
                 (rayDirection.X == 0) ? float.MaxValue : Math.Abs(1 / rayDirection.X),
                 (rayDirection.Y == 0) ? float.MaxValue : Math.Abs(1 / rayDirection.Y)
             );
-            Vector2D step;
-            Vector2D sideDist;
+            Vector2 step;
+            Vector2 sideDist;
             if (rayDirection.X < 0)
             {
                 step.X = -1;
@@ -168,6 +168,6 @@ internal class Camera(int width, int height, World world)
     private void UpdatePlaneVector()
     {
         float magnitude = MathF.Tan(FOV / 2 * (MathF.PI / 180));
-        _plane = new Vector2D(-Direction.Y * magnitude, Direction.X * magnitude);
+        _plane = new Vector2(-Direction.Y * magnitude, Direction.X * magnitude);
     }
 }
