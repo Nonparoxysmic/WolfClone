@@ -13,19 +13,6 @@ internal class Camera(int width, int height, World world)
     public Vector2D Position => _world.Player.Position;
     public Vector2D Direction => _world.Player.Direction;
 
-    // TEMPORARY
-    private readonly Color[] _wallColors =
-    [
-        Color.Black,
-        Color.Red,
-        Color.MonoGameOrange,
-        Color.Yellow,
-        Color.Green,
-        Color.Blue,
-        Color.Purple,
-        Color.Magenta,
-    ];
-
     private readonly World _world = world;
 
     private Vector2D _plane;
@@ -34,6 +21,7 @@ internal class Camera(int width, int height, World world)
     {
         UpdatePlaneVector();
 
+        // Clear the screen
         Color[] pixels = new Color[Width * Height];
         for (int x = 0; x < Width; x++)
         {
@@ -48,6 +36,8 @@ internal class Camera(int width, int height, World world)
                 pixels[i] = Color.SaddleBrown;
             }
         }
+
+        // Render the view
         for (int x = 0; x < Width; x++)
         {
             float horz = 2.0f * x / Width - 1;
@@ -131,16 +121,45 @@ internal class Camera(int width, int height, World world)
             int drawEnd = lineHeight / 2 + Height / 2;
             if (drawEnd >= Height) drawEnd = Height - 1;
 
-            // Debug color for the wall
-            Color wallColor = _wallColors[hitColorIndex];
-            if (side == 1)
-                wallColor = new(wallColor * 0.667f, 1.0f);
+            // Texture Mapping:
+            
+            // Retrieve texture for this tile index.
+            Color[] wallTexture = _world.PlaceholderTextures[hitColorIndex];
+            int texWidth = 64;
+            int texHeight = 64;
 
-            // Draw the vertical stripe for the wall slice.
+            // Calculate the exact point where the wall was hit.
+            double wallX;
+            if (side == 0)
+                wallX = Position.Y + perpWallDist * rayDirection.Y;
+            else
+                wallX = Position.X + perpWallDist * rayDirection.X;
+            wallX -= Math.Floor(wallX);
+
+            // Determine the horizontal coordinate on the texture.
+            int texX = (int)(wallX * texWidth);
+            if ((side == 0 && rayDirection.X > 0) || (side == 1 && rayDirection.Y < 0))
+            {
+                texX = texWidth - texX - 1;
+            }
+
+            // How much to increase the texture coordinate per screen pixel in the stripe.
+            double texStep = (double)texHeight / lineHeight;
+            // Starting texture coordinate for the current stripe.
+            double texPos = (drawStart - Height / 2 + lineHeight / 2) * texStep;
+
+            // Iterate over each pixel of the stripe and sample from the texture.
             for (int y = drawStart; y <= drawEnd; y++)
             {
+                int texY = (int)texPos;
+                if (texY < 0) texY = 0;
+                if (texY >= texHeight) texY = texHeight - 1;
+                texPos += texStep;
+                Color color = wallTexture[texX + 64 * texY];
+                if (side == 1)
+                    color = new Color(color * 0.667f, 1.0f);
                 int i = x + Width * y;
-                pixels[i] = wallColor;
+                pixels[i] = color;
             }
         }
         return pixels;

@@ -38,6 +38,29 @@ public class MainGame : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+        _world.PlaceholderTextures = new Color[5][];
+
+        Texture2D gray = Texture2D.FromFile(GraphicsDevice, "Assets/Textures/Placeholder/placeholder_gray.png");
+        Color[] grayColors = new Color[64 * 64];
+        gray.GetData(grayColors);
+        _world.PlaceholderTextures[0] = grayColors;
+        _world.PlaceholderTextures[1] = grayColors;
+
+        Texture2D blue = Texture2D.FromFile(GraphicsDevice, "Assets/Textures/Placeholder/placeholder_blue.png");
+        Color[] blueColors = new Color[64 * 64];
+        blue.GetData(blueColors);
+        _world.PlaceholderTextures[2] = blueColors;
+
+        Texture2D wood = Texture2D.FromFile(GraphicsDevice, "Assets/Textures/Placeholder/placeholder_wood.png");
+        Color[] woodColors = new Color[64 * 64];
+        wood.GetData(woodColors);
+        _world.PlaceholderTextures[3] = woodColors;
+
+        Texture2D brick = Texture2D.FromFile(GraphicsDevice, "Assets/Textures/Placeholder/placeholder_brick.png");
+        Color[] brickColors = new Color[64 * 64];
+        brick.GetData(brickColors);
+        _world.PlaceholderTextures[4] = brickColors;
     }
 
     protected override void Update(GameTime gameTime)

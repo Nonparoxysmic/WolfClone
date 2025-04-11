@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Xna.Framework;
 
 namespace WolfClone.FirstPerson.Engine;
 
@@ -6,6 +7,8 @@ internal class World
 {
     public Player Player { get; }
     public int[,] Level { get; private set; }
+
+    public Color[][] PlaceholderTextures { get; set; }
 
     public World()
     {
@@ -26,12 +29,12 @@ internal class World
                 }
                 if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
                 {
-                    Level[x, y] = rand.Next(8);
+                    Level[x, y] = rand.Next(5);
                     continue;
                 }
                 if (2 < x && x < width - 3 && 2 < y && y < height - 3)
                 {
-                    Level[x, y] = rand.Next(8);
+                    Level[x, y] = rand.Next(5);
                 }
             }
         }
