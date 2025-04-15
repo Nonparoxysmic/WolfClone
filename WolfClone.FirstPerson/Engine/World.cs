@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using Vector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace WolfClone.FirstPerson.Engine;
 
 internal class World
 {
     public Player Player { get; }
-    public int[,] Level { get; private set; }
+    public GridTile Level { get; private set; }
 
     public Color[][] PlaceholderTextures { get; set; }
 
@@ -16,7 +17,7 @@ internal class World
 
         int width = 16;
         int height = 16;
-        Level = new int[width, height];
+        Level = new GridTile(0, 0, null, 4);
         Random rand = new();
         for (int y = 0; y < height; y++)
         {
@@ -24,28 +25,35 @@ internal class World
             {
                 if (rand.NextDouble() < 0.5)
                 {
-                    Level[x, y] = 0;
-                    continue;
+                    Level[x, y] = new EmptyTile(x, y, Level);
                 }
-                if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
+                else if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
                 {
-                    Level[x, y] = rand.Next(5);
-                    continue;
+                    Level[x, y] = new BlockTile(x, y, Level, rand.Next(4) + 1);
                 }
-                if (2 < x && x < width - 3 && 2 < y && y < height - 3)
+                else if (2 < x && x < width - 3 && 2 < y && y < height - 3)
                 {
-                    Level[x, y] = rand.Next(5);
+                    Level[x, y] = new BlockTile(x, y, Level, rand.Next(4) + 1);
+                }
+                else
+                {
+                    Level[x, y] = new EmptyTile(x, y, Level);
                 }
             }
         }
     }
 
-    public int GetTile(int x, int y)
+    public Color CastRay(Vector3 position, Vector3 direction, float length = 32)
     {
-        if (x < 0 || y < 0 || x >= Level.GetLength(0) || y >= Level.GetLength(1))
+        float x = position.X;
+        float y = position.Y;
+        if (x < 0 || y < 0 || x >= Level.Width || y >= Level.Height)
         {
-            return 0;
+            // Player is outside the level
+            return Color.Black;
         }
-        return Level[x, y];
+        Vector3 levelPosition = new(position.X / Level.Width, position.Y / Level.Height, position.Z);
+        Tile current = Level.GetTile(levelPosition, out Vector3 tilePosition);
+        return current.CastRay(tilePosition, direction, length);
     }
 }

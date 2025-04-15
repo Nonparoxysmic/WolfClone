@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Vector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace WolfClone.FirstPerson.Engine;
 
@@ -9,13 +10,18 @@ public class MainGame : Game
 {
     private World _world;
     private Camera _camera;
+    private Texture2D _frame;
 
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
     public MainGame()
     {
-        _graphics = new GraphicsDeviceManager(this);
+        _graphics = new GraphicsDeviceManager(this)
+        {
+            PreferredBackBufferWidth = 640,
+            PreferredBackBufferHeight = 400
+        };
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         Window.ClientSizeChanged += new EventHandler<EventArgs>(OnWindowClientSizeChanged);
@@ -25,12 +31,9 @@ public class MainGame : Game
 
     protected override void Initialize()
     {
-        _graphics.PreferredBackBufferWidth = 640;
-        _graphics.PreferredBackBufferHeight = 400;
-        _graphics.ApplyChanges();
-
         _world = new();
         _camera = new(320, 200, _world);
+        _frame = new(_graphics.GraphicsDevice, _camera.Width, _camera.Height);
 
         base.Initialize();
     }
@@ -67,7 +70,7 @@ public class MainGame : Game
     {
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        var directionalInput = Vector2.Zero;
+        Vector3 directionalInput = Vector3.Zero;
         KeyboardState keyboardState = Keyboard.GetState();
         if (keyboardState.IsKeyDown(Keys.Up) || keyboardState.IsKeyDown(Keys.W))
         {
@@ -97,11 +100,11 @@ public class MainGame : Game
     {
         GraphicsDevice.Clear(Color.Gray);
 
-        Texture2D frame = new(_graphics.GraphicsDevice, _camera.Width, _camera.Height);
-        Color[] pixels = _camera.CaptureFrame();
-        frame.SetData(pixels);
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-        _spriteBatch.Draw(frame, new Rectangle(0, 0, _camera.Width * 2, _camera.Height * 2), Color.White);
+        Color[] pixels = _camera.CaptureFrame();
+        _frame.SetData(pixels);
+        Rectangle destinationRectangle = new(0, 0, _camera.Width * 2, _camera.Height * 2);
+        _spriteBatch.Draw(_frame, destinationRectangle, Color.White);
         _spriteBatch.End();
 
         base.Draw(gameTime);
